@@ -9,7 +9,7 @@ process.load("Configuration.StandardSequences.Services_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
-process.GlobalTag.globaltag = 'START53_V14::All'
+process.GlobalTag.globaltag = 'PRE_ST62_V8::All'
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
@@ -18,7 +18,7 @@ process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
                                 #'file:../../CMSSW_6_2_0_prod/src/MYCOPY.root'
-                                '/store/relval/CMSSW_5_3_6-START53_V14/RelValSingleMuPt1000/GEN-SIM-RECO/v2/00000/7C1AEF1C-FF29-E211-BA60-003048678B20.root'
+                                '/store/relval/CMSSW_6_2_0/RelValSingleMuPt10/GEN-SIM-RECO/PRE_ST62_V8-v3/00000/FEB7D35C-5CEC-E211-80AA-003048FEB8EE.root'
                             
     )
 )
@@ -26,15 +26,30 @@ process.source = cms.Source("PoolSource",
 
 
 process.load("SimGeneral.MixingModule.mixNoPU_cfi")
-process.load("SimGeneral.TrackingAnalysis.trackingParticlesNoSimHits_cfi")
+
+import SimGeneral.MixingModule.trackingTruthProducer_cfi
+process.mergedtruthNoSimHits = process.trackingParticles.clone(
+                                                            simHitCollections = cms.PSet(
+                                                                                         muon = cms.VInputTag(),
+                                                                                         tracker = cms.VInputTag(),
+                                                                                         pixel = cms.VInputTag()
+                                                                                         )
+                                                            )
+
+process.mix.digitizers.mergedtruth = process.mergedtruthNoSimHits
+
+print process.mix.digitizers
+
+
+
 process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring(
                                                                       'drop *',
-                                                                      'keep *_*_*_ALZ'),
+                                                                      'keep *_mix_*_ALZ'),
                                fileName = cms.untracked.string('testRECOouput.root')
                                )
 
-process.p = cms.Path(process.mix*process.mergedtruthNoSimHits)
+process.p = cms.Path(process.mix)
 
 process.outpath = cms.EndPath(process.out)
 
