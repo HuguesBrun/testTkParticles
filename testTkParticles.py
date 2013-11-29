@@ -36,9 +36,13 @@ process.mergedtruthNoSimHits = process.trackingParticles.clone(
                                                                                          )
                                                             )
 
-process.mix.digitizers.mergedtruth = process.mergedtruthNoSimHits
-
-print process.mix.digitizers
+process.mix.digitizers = cms.PSet( mergedtruth = process.mergedtruthNoSimHits )
+process.mix.mixObjects = cms.PSet()
+del process.simCastorDigis
+del process.simEcalUnsuppressedDigis
+del process.simHcalUnsuppressedDigis
+del process.simSiPixelDigis
+del process.simSiStripDigis
 
 
 
