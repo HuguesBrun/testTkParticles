@@ -23,7 +23,20 @@ process.source = cms.Source("PoolSource",
     )
 )
 
+process.load("SimMuon.MCTruth.MuonAssociatorByHitsESProducer_NoSimHits_cfi") 
 
+process.classByHitsTM = cms.EDProducer("MuonMCClassifier",
+     muons = cms.InputTag("muons"),
+     muonPreselection = cms.string("isTrackerMuon"),  #
+     #muonPreselection = cms.string("muonID('TrackerMuonArbitrated')"), # You might want this
+     trackType = cms.string("segments"),  # or 'inner','outer','global'
+     trackingParticles = cms.InputTag("mix"),         
+     associatorLabel   = cms.string("muonAssociatorByHits_NoSimHits"),
+     decayRho  = cms.double(200), # to classifiy differently decay muons included in ppMuX
+     decayAbsZ = cms.double(400), # and decay muons that could not be in ppMuX
+     linkToGenParticles = cms.bool(True),          # produce also a collection of GenParticles for secondary muons
+     genParticles = cms.InputTag("genParticles"),  # and associations to primary and secondaries
+ )
 
 process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 
@@ -49,11 +62,13 @@ del process.simSiStripDigis
 process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring(
                                                                       'drop *',
+                                                                      'keep *_classByHitsTM_*_ALZ',
                                                                       'keep *_mix_*_ALZ'),
                                fileName = cms.untracked.string('testRECOouput.root')
                                )
 
-process.p = cms.Path(process.mix)
+#process.p = cms.Path(process.mix)
+process.p = cms.Path(process.mix*process.classByHitsTM)
 
 process.outpath = cms.EndPath(process.out)
 
